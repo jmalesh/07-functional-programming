@@ -83,7 +83,7 @@ Article.numWordsAll = function() {
     return article.body.match(/\b\w+/g).length;
   })
   .reduce(function(a, b) {
-    // return (TODO: Sum up all the values!)
+    // return  (TODO: Sum up all the values!)
   });
 };
 

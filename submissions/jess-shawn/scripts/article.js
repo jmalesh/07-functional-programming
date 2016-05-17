@@ -51,7 +51,7 @@
     if (localStorage.hackerIpsum) {
       $.ajax({
         type: 'HEAD',
-        url: '/data/hackerIpsum.json',
+        url: 'data/hackerIpsum.json',
         success: function(data, message, xhr) {
           var eTag = xhr.getResponseHeader('eTag');
           if (!localStorage.eTag || eTag !== localStorage.eTag) {
@@ -70,7 +70,7 @@
   };
 
   Article.getAll = function(next) {
-    $.getJSON('/data/hackerIpsum.json', function(responseData) {
+    $.getJSON('data/hackerIpsum.json', function(responseData) {
       Article.loadAll(responseData);
       localStorage.hackerIpsum = JSON.stringify(responseData);
       next();// TODO: call next!
@@ -85,8 +85,7 @@
       return article.body.match(/\b\w+/g).length;
     })
     .reduce(function(a, b) {
-      var sums = a + b;
-      return sums;
+      return a + b;
       // return (TODO: Sum up all the values!)
     });
   };
@@ -94,11 +93,14 @@
   /* TODO: Chain together a `map` and a `reduce` call to
             produce an array of *unique* author names. */
   Article.allAuthors = function() {
-    Article.all.map(function(article) {
-      return article.author;
-    });
-    Article.all.reduce(function(acc, cur, idx, array) {
-      return array.indexOf(cur) === idx;
+    return Article.all.map(function(collection) {
+      return collection.author;
+    })
+    .reduce(function(acc, cur, idx, array) {
+      if(acc.indexOf(cur) < 0){
+        acc.push(cur);
+      }
+      return acc;
     },[]);
     //return       TODO: map our collection
       //return    TODO: return just the author names
@@ -106,6 +108,7 @@
     /* TODO: For our `reduce` that we'll chain here -- since we are trying to
         return an array, we'll need to specify an accumulator type...
         What data type should this accumulator be and where is it placed? */
+
   };
 
   Article.numWordsByAuthor = function() {
@@ -114,12 +117,17 @@
         the matching articles written by the specified author. */
     return Article.allAuthors().map(function(a) { // 'a' is a reference to an individual author.
       return {
-        // name:
-        // numWords: someCollection.filter(function(curArticle) {
-        //  what do we return here to check for matching authors?
-        // })
-        // .map(...) // use .map to return the author's word count for each article's body (hint: regexp!).
-        // .reduce(...) // squash this array of numbers into one big number!
+        name: a,
+        numWords: Article.all.filter(function(curArticle) {
+          //  what do we return here to check for matching authors?
+          return curArticle.author === a;
+        })
+        .map(function(article){
+          return article.body.match(/\b\w+/g).length;
+        }) // use .map to return the author's word count for each article's body (hint: regexp!).
+        .reduce(function(a,b){
+          return a + b;
+        }) // squash this array of numbers into one big number!
       };
     });
   };
